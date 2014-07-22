@@ -1,0 +1,98 @@
+﻿@using System.Configuration
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Restaurants</title>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="http://knockoutjs.com/downloads/knockout-3.1.0.js"></script>
+    <script src="Scripts/JE.API.js"></script>
+    <script src="Scripts/JE.RestaurantsViewModel.js"></script>
+    <script src="Scripts/JE.MenuViewModel.js"></script>
+
+    <div class="container">
+        <h1>JustEat - Order a takeaway</h1>
+        <div id="restaurants-panel">
+            <div class="well">
+                <form data-bind="submit: loadRestaurants">
+                    <label>Postcode:</label>
+                    <input type="text" name="postcode" data-bind="value: postcode" />
+                    <input type="submit" value="GO" class="btn" />
+                </form>
+            </div>
+
+            <div data-bind="visible: !selectedRestaurant()" style="display: none;">
+                <div data-bind="visible: isLoadingRestaurants">Loading restaurants...</div>
+
+                <div class="well" data-bind="visible: hasRestaurants">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Address</th>
+                                <th>City</th>
+                                <th>Postcode</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody data-bind="foreach: restaurants">
+                            <tr>
+                                <td data-bind="text: Name"></td>
+                                <td data-bind="text: Address"></td>
+                                <td data-bind="text: City"></td>
+                                <td data-bind="text: Postcode"></td>
+                                <td><input type="button" data-bind="click: $parent.getMenu" value="Select" class="btn" /></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div data-bind="visible: selectedRestaurant(), with: selectedRestaurant">
+                <h2 data-bind="text: Name"></h2>
+            </div>
+        </div>
+
+        <div id="menu-panel">
+            <div data-bind="visible: isLoadingMenu" style="display: none;">Loading menu...</div>
+
+            <div class="well" data-bind="visible: isChoosingProduct" style="display: none;">
+                <label>Options</label>
+                <div data-bind="with: selectedMenuItem">
+                    <ul data-bind="foreach: Products" class="list-group">
+                        <li class="list-group-item">
+                            <a href="#" data-bind="text: friendlyName, click: $parents[1].addToBasket"></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="well" style="display: none" data-bind="visible: hasMenuCategories">
+                <div data-bind="foreach: menuCategories" class="list-group">
+                    <div class="list-group-item disabled">
+                        <label data-bind="text: Name"></label>
+
+                        <ul data-bind="foreach: MenuItems" class="list-group">
+                            <li class="list-group-item">
+                                <a href="#" data-bind="text: Name, click: $parents[1].chooseProduct"></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        JE.API.setAuthKey('@ConfigurationManager.AppSettings["Auth-Key"]');
+
+        var restaurants = new JE.RestaurantsViewModel();
+        ko.applyBindings(restaurants, document.getElementById('restaurants-panel'));
+
+        var menuViewModel = new JE.MenuViewModel();
+        restaurants.onGetMenu(menuViewModel.getMenu);
+        ko.applyBindings(menuViewModel, document.getElementById('menu-panel'));
+    </script>
+</body>
+</html>
