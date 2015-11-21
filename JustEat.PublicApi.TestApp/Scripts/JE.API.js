@@ -4,7 +4,7 @@
 JE.API = (function () {
     var self = this;
 
-    var baseURI = 'http://api-interview.just-eat.com/';
+    var baseURI = 'https://public.je-apis.com/';
 
     self.setAuthKey = function (authKey) {
         if (!authKey) {
